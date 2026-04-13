@@ -52,14 +52,7 @@ const AdminDashboard = () => {
 
   // FETCH DEPARTMENTS
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/admin/departments", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
-    })
-      .then((res) => res.json())
-      .then((data) => setDepartments(data || []))
-      .catch(() => setDepartments([]));
+    fetchDepartments();
   }, []);
 
 
@@ -74,6 +67,15 @@ const AdminDashboard = () => {
       setCurrentPage(1);
     } catch {
       setNotifications([]);
+    }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const res = await API.get("/admin/departments");
+      setDepartments(res.data || []);
+    } catch {
+      setDepartments([]);
     }
   };
 
@@ -278,24 +280,24 @@ const AdminDashboard = () => {
 
 
               <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
-  <button
-    disabled={currentPage === 1}
-    onClick={() => setCurrentPage((prev) => prev - 1)}
-  >
-    ⬅ Prev
-  </button>
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                >
+                  ⬅ Prev
+                </button>
 
-  <span>
-    Page {currentPage} of {totalPages || 1}
-  </span>
+                <span>
+                  Page {currentPage} of {totalPages || 1}
+                </span>
 
-  <button
-    disabled={currentPage === totalPages}
-    onClick={() => setCurrentPage((prev) => prev + 1)}
-  >
-    Next ➡
-  </button>
-</div>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                >
+                  Next ➡
+                </button>
+              </div>
 
             </div>
           )}
