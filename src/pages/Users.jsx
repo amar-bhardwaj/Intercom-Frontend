@@ -24,10 +24,7 @@ const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(20);
 
-  useEffect(() => {
-    fetchUsers();
-    fetchDepartments();
-  }, []);
+
 
   // ✅ FETCH USERS
   const fetchUsers = async () => {
@@ -44,10 +41,12 @@ const Users = () => {
     try {
       const res = await API.get("/admin/departments");
       setDepartments(res.data || []);
-    } catch {
-      console.error("Error fetching departments");
+    } catch (err) {
+      console.error("Error fetching departments", err);
+      setDepartments([]);
     }
   };
+
 
   // ✅ CREATE USER
   const createUser = async () => {
@@ -386,7 +385,7 @@ const Users = () => {
             >
               ← Previous
             </button>
-            
+
             <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", justifyContent: "center" }}>
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum;
@@ -399,7 +398,7 @@ const Users = () => {
                 } else {
                   pageNum = currentPage - 2 + i;
                 }
-                
+
                 return (
                   <button
                     key={pageNum}
@@ -430,11 +429,11 @@ const Users = () => {
                   </button>
                 );
               })}
-              
+
               {totalPages > 5 && currentPage < totalPages - 2 && (
                 <span style={{ padding: "8px 5px" }}>...</span>
               )}
-              
+
               {totalPages > 5 && currentPage < totalPages - 2 && (
                 <button
                   onClick={() => paginate(totalPages)}
@@ -459,7 +458,7 @@ const Users = () => {
                 </button>
               )}
             </div>
-            
+
             <button
               onClick={nextPage}
               disabled={currentPage === totalPages}
