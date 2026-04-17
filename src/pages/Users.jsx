@@ -29,12 +29,22 @@ const Users = () => {
   // ✅ FETCH USERS
   const fetchUsers = async () => {
     try {
+      console.log("Fetching users...");
       const res = await API.get("/admin/users");
+      console.log("Users response:", res.data);
       setUsers(res.data || []);
-    } catch {
-      console.error("Error fetching users");
+    } catch (err) {
+      console.error("Error fetching users", err); // 👈 CHANGE THIS
     }
   };
+
+
+  useEffect(() => {
+    fetchUsers();
+    fetchDepartments();
+  }, []);
+
+
 
   // ✅ FETCH DEPARTMENTS
   const fetchDepartments = async () => {
