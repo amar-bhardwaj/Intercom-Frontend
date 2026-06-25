@@ -5,6 +5,7 @@ import socket from "../services/socket";
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+
     const perPage = 10;
 
     const role = localStorage.getItem("role");
@@ -16,6 +17,9 @@ const Notifications = () => {
 
     const indexOfLast = currentPage * perPage;
     const indexOfFirst = indexOfLast - perPage;
+
+    const [notificationMsg, setNotificationMsg] = useState("");
+    const [file, setFile] = useState(null);
 
     const currentNotifications = notifications.slice(indexOfFirst, indexOfLast);
 
@@ -31,7 +35,15 @@ const Notifications = () => {
         // 🔔 REALTIME ADD
         socket.on("notification", (data) => {
             setNotifications((prev) => [data, ...prev]);
-            audioRef.current?.play().catch(() => { });
+
+            const senderId =
+                typeof data.sender === "object"
+                    ? data.sender?._id
+                    : data.sender;
+
+            if (senderId !== userId) {
+                audioRef.current?.play().catch(() => { });
+            }
         });
 
         // 🗑 REALTIME DELETE
@@ -101,9 +113,97 @@ const Notifications = () => {
         }
     };
 
+
+    //Notifications Fixed
+    const sendNotification = async () => {
+        if (!notificationMsg.trim()) {
+            alert("Enter notification message");
+            return;
+        }
+
+        let fileUrl = "";
+
+        if (file) {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const uploadRes = await API.post("/upload", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                });
+
+                fileUrl = uploadRes.data.fileUrl;
+            } catch (err) {
+                alert("File upload failed");
+                return;
+            }
+        }
+
+        socket.emit("sendNotification", {
+            message: notificationMsg,
+            sender: userId,
+            departmentId,
+            fileUrl
+        });
+
+        alert("Notification sent");
+
+        setNotificationMsg("");
+        setFile(null);
+    };
+
+
+
     return (
         <div style={{ padding: "20px" }}>
             <h2>🔔 Notifications</h2>
+            {role === "manager" && (
+                <div
+                    style={{
+                        background: "#f5f5f5",
+                        padding: "15px",
+                        borderRadius: "8px",
+                        marginBottom: "20px"
+                    }}
+                >
+                    <h3>Send Notification</h3>
+
+                    <textarea
+                        value={notificationMsg}
+                        onChange={(e) => setNotificationMsg(e.target.value)}
+                        placeholder="Enter notification..."
+                        style={{
+                            width: "100%",
+                            height: "80px"
+                        }}
+                    />
+
+                    <input
+                        type="file"
+                        onChange={(e) => setFile(e.target.files[0])}
+                        style={{ marginTop: "10px" }}
+                    />
+
+                    <button
+                        onClick={sendNotification}
+                        style={{ marginTop: "10px" }}
+                    >
+                        Send Notification
+                    </button>
+
+                    <p
+                        style={{
+                            fontSize: "12px",
+                            color: "gray",
+                            marginTop: "5px"
+                        }}
+                    >
+                        Notification will be sent only to your department.
+                    </p>
+                </div>
+            )}
 
             {notifications.length === 0 && <p>No notifications</p>}
 

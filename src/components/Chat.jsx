@@ -857,7 +857,7 @@ const Chat = () => {
                         e.currentTarget.style.transform = "scale(1)";
                       }}
                     >
-                      {getFileIcon(msg.fileUrl)} {msg.fileName || "Download File"}
+                      {getFileIcon(msg.fileUrl)} {msg.fileName}
                     </button>
                   )}
 
